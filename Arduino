@@ -1,47 +1,164 @@
 //Chase Robotics Angel Hack 2018 
 // 6/23/2018
 
+#include <Wire.h>
+#include <L3G.h>
 
 //Initializing ecoder 
 #define outputA 5
  #define outputB 4
+ L3G gyro;
  int counter = 0; 
  int aState;
  int aLastState;  
  double distance ;
 
+int data ;
+int c;
+
+
 //motor pwm pin
 int motor1 = 10;
 int motor2 = 11;
-int one;
-String inString ="";
+String inString ;
 
 void setup() {
  pinMode (motor1, OUTPUT);
  pinMode (motor2, OUTPUT);
   pinMode (outputA,INPUT);
    pinMode (outputB,INPUT);
-
+pinMode(LED_BUILTIN,OUTPUT);
    Serial.begin (9600);
-   
+   Wire.begin();
+   if (!gyro.init())
+   {
+    Serial.println("Failed to autodetect gyro type!");
+   }
+   gyro.enableDefault();
    // Reads the initial state of the outputA
    aLastState = digitalRead(outputA); 
 
 }
 
+int getCommandType(int c)
+{
+  return c / 1000;
+}
+
+int getDistanceFromCommand(int c)
+{
+  return c % 1000;
+}
+
+int getAngleFromCommand(int c)
+{
+  return c % 2000;
+}
+
+void driveUntil(int distance)
+{
+  counter = 0;
+  int encState = 0;
+  int lastState = 0;
+  int distanceDriven = 0; 
+  while(distanceDriven < distance)
+  {
+    analogWrite (motor1, 208 ); // right motor forward
+    analogWrite (motor2, 171); // left motor forwarad
+    lastState = encState;
+    encState = digitalRead(outputA);
+    if(encState != lastState)
+    {
+      counter++;
+    }
+    Serial.println(distanceDriven);
+    distanceDriven = (23.87*counter)/14;
+    delay(20);  
+  }
+  analogWrite (motor1, 190 );
+  analogWrite (motor2, 190);
+    
+    
+}
+
+void turnRight()
+{
+  delay(1000);
+      analogWrite(motor1, 168);
+    analogWrite(motor2, 158);
+
+  delay (1000);
+  analogWrite(motor1, 190);
+    analogWrite(motor2, 190);
+}
+
+void turnLeft()
+{
+  delay(1000);
+    analogWrite(motor1, 194);
+    analogWrite(motor2, 202);
+
+  delay (1000);
+    analogWrite(motor1, 190);
+    analogWrite(motor2, 190);
+
+  
+}
+
+void turnUntil(int angle)
+{
+  /*Serial.println("starting turn");
+  int angleTurned = 0;
+  int counter = 0;
+  int totalRate = 0;
+  int averageRate = 0;
+  while(counter < 50)
+  {
+    Serial.println("continuing turn");
+    gyro.read();
+    int rate = (int)(gyro.g.z) / 10;
+    totalRate += rate;
+    counter++;
+    delay(100);
+  }
+  Serial.println(angle);*/
+}
 void loop() {
 
 
-  if (Serial.available () == 2){
-    one = Serial.read();
-    Serial.println(one);
-  }
+ if (Serial.available () >= 1){
+    data = Serial.parseInt();
+    Serial.println(data);
+    int commandType = getCommandType(data);
+    if(commandType == 1)
+    {
+      int distance = getDistanceFromCommand(data);
+      driveUntil(distance);
+      Serial.println("Drive completed.");
+    }
+    else if(commandType == 2)
+    {
+      int value = getAngleFromCommand(data);
+      if(value == 1)
+      {
+        turnLeft();
+        Serial.println("Left turn completed.");
+      }
+      else if(value == 2)
+      {
+        turnRight();
+        Serial.println("Right turn completed.");
+      }
+    }
+ }
+    
+    
+  
   
   
 // encoder stuff 
-
    
-     aState = digitalRead(outputA); 
+/*    aState = digitalRead(outputA); 
    
    if (aState != aLastState){     
      
@@ -57,14 +174,14 @@ void loop() {
    } 
    aLastState = aState; // Updates the previous state of the outputA with the current state
     
-    if ( counter > 4) { 
-
+    if ( counter > data) { 
+  digitalWrite(LED_BUILTIN, HIGH);
   //make robot go forward
     analogWrite (motor1, 198 ); // right motor forward
     analogWrite (motor2, 171); // left motor forwarad
     
     }
-    delay (20);
+    delay (20);*/
 
 
 /*
@@ -104,4 +221,4 @@ void loop() {
 
  
 
-}
+  }
