@@ -1,0 +1,107 @@
+//Chase Robotics Angel Hack 2018 
+// 6/23/2018
+
+
+//Initializing ecoder 
+#define outputA 5
+ #define outputB 4
+ int counter = 0; 
+ int aState;
+ int aLastState;  
+ double distance ;
+
+//motor pwm pin
+int motor1 = 10;
+int motor2 = 11;
+int one;
+String inString ="";
+
+void setup() {
+ pinMode (motor1, OUTPUT);
+ pinMode (motor2, OUTPUT);
+  pinMode (outputA,INPUT);
+   pinMode (outputB,INPUT);
+
+   Serial.begin (9600);
+   
+   // Reads the initial state of the outputA
+   aLastState = digitalRead(outputA); 
+
+}
+
+void loop() {
+
+
+  if (Serial.available () == 2){
+    one = Serial.read();
+    Serial.println(one);
+  }
+  
+  
+// encoder stuff 
+
+   
+     aState = digitalRead(outputA); 
+   
+   if (aState != aLastState){     
+     
+     if (digitalRead(outputB) != aState) { 
+       counter ++;
+     } else {
+       counter --;
+     }
+     distance = (23.87*counter)/14 ; 
+     Serial.print("Position: ");
+     Serial.println(counter);
+     Serial.println(distance);
+   } 
+   aLastState = aState; // Updates the previous state of the outputA with the current state
+    
+    if ( counter > 4) { 
+
+  //make robot go forward
+    analogWrite (motor1, 198 ); // right motor forward
+    analogWrite (motor2, 171); // left motor forwarad
+    
+    }
+    delay (20);
+
+
+/*
+
+ delay(2000);
+     analogWrite(motor1,190);
+     analogWrite(motor2,190);
+      
+  delay(2000);
+     //makes robot go backwards
+     analogWrite (motor1, 182);
+     analogWrite (motor2, 202);
+
+   delay(2000);
+     analogWrite(motor1,190);
+     analogWrite(motor2,190);
+
+  delay (2000);
+  //make robot turn right
+    analogWrite(motor1, 168);
+    analogWrite(motor2, 158);
+
+  delay (1000);
+     analogWrite(motor1,190);
+     analogWrite(motor2,190);
+  delay (1000);
+   //make robot turn left 
+    analogWrite(motor1, 194);
+    analogWrite(motor2, 202);
+
+  delay (1000);
+     analogWrite(motor1,190);
+     analogWrite(motor2,190);
+  
+
+   */
+
+ 
+
+}
